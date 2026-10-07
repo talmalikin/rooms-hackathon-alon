@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>האקתון גדוד אלון</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=Heebo:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: dark-first "event badge" page — glowing search bar on a dotted grid, result rendered as a hackathon badge with a huge team number and a neon room pill. */
+:root{
+  --bg:#0b0f1e; --bg2:#121a33; --paper:#161f3a; --fg:#f2f4ff; --muted:#8e97b8; --line:#2a3458;
+  --hot:#ff5c7a; --volt:#ffd43b; --cyan:#3de1ff; --hot-fg:#1a0a10; --volt-fg:#1a1400;
+  --grid:rgba(120,140,255,.14); --glow:rgba(61,225,255,.35);
+  --display:'Secular One','Heebo',Arial,sans-serif; --body:'Heebo',Arial,Helvetica,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){ :root:not([data-theme="dark"]){
+  --bg:#f4f5fb; --bg2:#e9ecf8; --paper:#ffffff; --fg:#111633; --muted:#5e6686; --line:#d6dbee;
+  --hot:#e8325a; --volt:#f2b600; --cyan:#0aa7c9; --hot-fg:#ffffff; --volt-fg:#1a1400;
+  --grid:rgba(40,60,160,.12); --glow:rgba(10,167,201,.25); color-scheme:light } }
+:root[data-theme="light"]{
+  --bg:#f4f5fb; --bg2:#e9ecf8; --paper:#ffffff; --fg:#111633; --muted:#5e6686; --line:#d6dbee;
+  --hot:#e8325a; --volt:#f2b600; --cyan:#0aa7c9; --hot-fg:#ffffff; --volt-fg:#1a1400;
+  --grid:rgba(40,60,160,.12); --glow:rgba(10,167,201,.25); color-scheme:light }
+
+*{box-sizing:border-box}
+body{margin:0;color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5;direction:rtl;
+  padding-inline:16px;padding-block:24px 64px;
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(255,92,122,.22), transparent 60%),
+    radial-gradient(700px 420px at 0% 10%, rgba(61,225,255,.18), transparent 60%),
+    radial-gradient(var(--grid) 1.2px, transparent 1.3px) 0 0/22px 22px,
+    linear-gradient(var(--bg),var(--bg2));
+  background-attachment:fixed}
+.wrap{max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+
+header{display:flex;flex-direction:column;gap:10px;padding-top:8px}
+.tag{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font-size:13px;font-weight:700;letter-spacing:.12em;
+  padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--cyan);background:color-mix(in srgb,var(--paper) 70%,transparent)}
+.tag i{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,11vw,84px);line-height:.95;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--hot)}
+.sub{color:var(--muted);margin:0;font-size:16px;max-width:46ch}
+.stats{display:flex;gap:18px;flex-wrap:wrap;font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted)}
+.stats b{color:var(--fg);font-size:18px;font-family:var(--display);font-weight:400;margin-left:4px}
+
+.search{position:relative}
+.search input{width:100%;font:inherit;font-size:22px;font-weight:500;padding:18px 56px 18px 18px;border:2px solid var(--line);border-radius:18px;
+  background:var(--paper);color:var(--fg);outline:none;box-shadow:0 10px 40px -20px var(--glow);transition:border-color .15s,box-shadow .15s}
+.search input::placeholder{color:var(--muted);font-weight:400}
+.search input:focus{border-color:var(--cyan);box-shadow:0 0 0 4px var(--glow),0 10px 40px -20px var(--glow)}
+.search svg{position:absolute;right:20px;top:50%;transform:translateY(-50%);width:24px;height:24px;stroke:var(--cyan);fill:none;stroke-width:2.4;stroke-linecap:round;pointer-events:none}
+.hint{font-size:13px;color:var(--muted);margin:8px 6px 0}
+
+.list{background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.list button{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:right;font:inherit;background:none;border:0;
+  border-bottom:1px solid var(--line);padding:13px 18px;color:var(--fg);cursor:pointer}
+.list button:last-child{border-bottom:0}
+.list button:hover,.list button:focus-visible{background:color-mix(in srgb,var(--cyan) 10%,var(--paper));outline:none}
+.list .meta{color:var(--muted);font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.empty{padding:16px 18px;color:var(--muted)}
+
+/* badge */
+.badge{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:24px;overflow:hidden;
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.6);display:flex;flex-direction:column}
+.badge::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:linear-gradient(90deg,var(--hot),var(--volt),var(--cyan))}
+.badge .top{padding:26px 24px 18px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.badge .name{font-family:var(--display);font-size:clamp(30px,7vw,40px);margin:0;line-height:1.05}
+.badge .who{color:var(--muted);font-size:15px;margin:4px 0 0}
+.room{display:inline-flex;flex-direction:column;align-items:center;background:var(--volt);color:var(--volt-fg);border-radius:14px;padding:8px 18px;line-height:1;
+  transform:rotate(-2deg);box-shadow:0 8px 24px -8px var(--volt)}
+.room small{font-size:12px;font-weight:700;letter-spacing:.14em}
+.room b{font-family:var(--display);font-weight:400;font-size:34px;margin-top:2px;font-variant-numeric:tabular-nums}
+.teamband{display:flex;align-items:center;gap:18px;padding:14px 24px;background:color-mix(in srgb,var(--hot) 14%,var(--paper));border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+.teamband .n{font-family:var(--display);font-size:72px;line-height:1;color:var(--hot);font-variant-numeric:tabular-nums}
+.teamband .l{display:flex;flex-direction:column;gap:2px}
+.teamband .l span:first-child{font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--muted)}
+.teamband .l span:last-child{font-size:18px;font-weight:700}
+.mates{padding:18px 24px 22px}
+.mates h3{margin:0 0 10px;font-size:13px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.mates ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.mates li{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding:6px 0;min-width:0}
+.mates li span:last-child{color:var(--muted);font-size:14px;white-space:nowrap}
+.mates li.me span:first-child{color:var(--cyan);font-weight:700}
+.badge .foot{display:flex;justify-content:space-between;align-items:center;padding:0 24px 20px;gap:12px;flex-wrap:wrap}
+.back{font:inherit;font-size:14px;font-weight:700;background:none;border:1px solid var(--line);border-radius:999px;padding:8px 16px;color:var(--fg);cursor:pointer}
+.back:hover{border-color:var(--cyan);color:var(--cyan)}
+.share{font-size:12px;color:var(--muted);letter-spacing:.08em}
+
+details{border-top:1px solid var(--line);padding-top:16px}
+summary{cursor:pointer;font-family:var(--display);font-size:22px;list-style:none;display:flex;align-items:center;gap:10px}
+summary::before{content:"+";color:var(--hot);font-size:26px;line-height:1}
+details[open] summary::before{content:"−"}
+.rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:14px}
+.roomcard{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.roomcard .rn{display:flex;align-items:baseline;gap:8px}
+.roomcard .rn small{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.roomcard .rn b{font-family:var(--display);font-weight:400;font-size:26px;color:var(--volt)}
+.roomcard .ts{display:flex;gap:6px;flex-wrap:wrap}
+.roomcard button{font:inherit;font-size:14px;font-weight:700;border:1px solid var(--line);background:none;color:var(--fg);border-radius:10px;padding:4px 10px;cursor:pointer}
+.roomcard button:hover{border-color:var(--hot);color:var(--hot)}
+footer{font-size:13px;color:var(--muted);padding-top:4px}
+@media (max-width:440px){.mates ul{grid-template-columns:1fr}.teamband .n{font-size:60px}}
+@media (prefers-reduced-motion:no-preference){
+  .badge{animation:pop .25s cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="tag"><i></i>בה״ד 1 · גדוד אלון</span>
+    <h1>האקתון<br><em>איפה אני?</em></h1>
+    <p class="sub">כתבו את השם, קבלו צוות, חדר וחברי צוות. אפשר גם חלק מהשם.</p>
+    <div class="stats"><span><b>267</b> צוערים</span><span><b>33</b> צוותים</span><span><b>12</b> חדרים</span></div>
+  </header>
+
+  <div class="search">
+    <input id="q" type="search" placeholder="שם פרטי או משפחה…" autocomplete="off" autofocus aria-label="חיפוש לפי שם">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+    <div class="hint" id="hint">אם יש שני אנשים עם אותו שם, בדקו את הפלוגה.</div>
+  </div>
+
+  <div id="out"></div>
+
+  <details id="all">
+    <summary>כל החדרים והצוותים</summary>
+    <div class="rooms" id="rooms"></div>
+  </details>
+
+  <footer>2–3 צוותים בכל חדר. לשינוי המיפוי עורכים את <code>ROOMS</code> בראש הקוד.</footer>
+</div>
+
+<script>
+// כל שורה: [שם, פלוגה, תוכנית/שיוך, צוות]
+const ROWS = [["אמיר לביא","א","אקדמיזציה",1],["נגה אגינסקי","א","תלפיות",1],["איתן מהל","ג","חיל הים",1],["ניר גונטמכר","ג","גבישים",1],["איתי אברהם","ד","תלפיות",1],["הדר שביט","ד","חבצלות",1],["ליעד קלופר","ה","חבצלות",1],["עידו בלנקלדר","ה","צמרת",1],["גילעד קושיצקי","ב","תלפיות",2],["שירה קופלר","ב","צמרת",2],["גיא ברקת","ג","חבצלות",2],["יוחאי שילינגר","ג","תלפיות",2],["אדם אורבך","ד","ברקים",2],["מעין רביד","ד","תלפיות",2],["אבישי אבנשטיין","ה","חבצלות",2],["איתן גודמן","ה","בינה",2],["אסף כחלון","ה","צמרת",2],["אמיתי רובינשטיין","א","תוכניתן באופק",3],["ליאל יאלונצקי","א","חבצלות",3],["איתי קליין","ב","תלפיות",3],["איתן רוזנר","ב","תלפיות",3],["גיא כץ","ד","תלפיות",3],["יאיר חוף","ד","חבצלות",3],["יעל בנעים","ה","צמרת",3],["עומרי מועדי","ה","עתודה – חיל הים",3],["גל זיו","א","סילון",4],["מילה מורבייב","א","צמרת",4],["דניאל אור נאמני","ב","תוכניתן באופק",4],["דניאל ואידה","ב","עתודה",4],["אביב פרידמן","ד","חבצלות",4],["יואב ארם","ד","תלפיות",4],["חן שלגי","ה","חבצלות",4],["ערן דוד כהן","ה","תלפיות",4],["יאיר שמיר","א","חבצלות",5],["תומר כהן","א","צמרת",5],["איתי משאלי","ב","חבצלות",5],["יהל דקל","ב","סילון",5],["יהונתן אדיב","ד","תלפיות",5],["יסמין חדד","ד","תלפיות",5],["גילעד חורב","ה","תוכ״ש",5],["מוריה מנחם","ה","אלונים",5],["איתן אלבז","א","תלפיות",6],["שירה לוגסי","א","חבצלות",6],["איתי פריידס","ב","תלפיות",6],["טלי גוכמן","ב","צמרת",6],["גבריאל פרידמן","ג","חיל הים",6],["יאיר גוטלר","ג","תלפיות",6],["ליאור פלג","ה","צמרת",6],["נעם מיכאל","ה","חבצלות",6],["בנימין עסיס","א","צמרת",7],["שיר ארביב","א","בינה",7],["אליה טויטו","ב","יועכ״ל",7],["מקסים לנצמן","ב","תלפיות",7],["איתי בירנבוים","ג","תלפיות",7],["יהונתן פרידמן","ג","חבצלות",7],["טל סילאגי","ה","צמרת",7],["יונתן ליכטר","ה","חבצלות",7],["עלמה צח","ב","חבצלות",8],["עמית שני","ב","חבצלות",8],["מאור זוהר","ג","צמרת",8],["תומר איזנברג","ג","אר״ם",8],["זיו אור","ד","תלפיות",8],["רני פלג","ד","תלפיות",8],["ורולקר הראל","ה","סילון",8],["נאוה צופיה קראוס","ה","צמרת",8],["איתמר ליפקין","א","תלפיות",9],["אמרי פינקמן עפר","א","תלפיות",9],["גלי עמרני","ג","דלתא",9],["נועה יעקב","ג","תלפיות",9],["אוהד בר-און","ד","כושר קרבי",9],["יובל גל","ד","צמרת",9],["ניתאי גלב","ה","חבצלות",9],["נתנאל קרנר","ה","צמרת",9],["איתי צדיק","א","תוכניתן באופק",10],["עמית חיים","א","צמרת",10],["יובל גופר","ב","תלפיות",10],["ליאורה בלקום","ב","תלפיות",10],["אורי מרקוביץ","ד","חבצלות",10],["רוני דאי","ד","תוכניתנית",10],["יובל אפשטיין","ה","צמרת",10],["שלו לפן","ה","חבצלות",10],["מעיין אביגייל צדקה","א","עתודה משא״ן",11],["רועי אינהורן זרזקי","א","תלפיות",11],["בן הלמן","ג","עתודה אקדמית בהנדסת נתונים ומידע",11],["עדי מרציאנו","ג","חבצלות",11],["אדר קדוש","ד","צמרת",11],["יואב שם דוד","ד","צמרת",11],["אסף סרוסי","ה","תלפיות",11],["חן זוסמן","ה","חבצלות",11],["אהד אלון","א","תלפיות",12],["מתן גינזבורג","א","אקדמיזציה – טנ״א",12],["אפרת סרגני","ג","צמרת",12],["יפתח ברסקין","ג","חבצלות",12],["גלי שלום","ד","תלפיות",12],["נדב שחורי","ד","תלפיות",12],["נגה פוסטיק","ה","פסגות",12],["שלו בטסיקס","ה","עתודה – אגף המודיעין",12],["מאיה אפשטיין","א","תלפיות",13],["עומר מתן אמיתי","א","תלפיות",13],["יעקב ישראל בלוק","ג","תלפיות",13],["לירוי שר","ג","צמרת",13],["מתן שטגר","ד","צמרת",13],["רותם כספי","ד","ברקים",13],["יהונתן צאלח","ה","חבצלות",13],["נדב בר-און","ה","חבצלות",13],["דוד הראל","א","חבצלות",14],["יואב סלמיניס","א","ברקים",14],["מיטל מזרחי","א","חבצלות",14],["יואב בם","ב","תלפיות",14],["ליאן עמוס","ב","צמרת",14],["אברהם ברדוגו","ג","בינה",14],["רום יעקוביאן","ג","תלפיות",14],["דניאל רוני לנדוי","ה","צמרת",14],["רייאן אבו-רוכן","ה","תלפיות",14],["ג׳יימס רוטשילד","א","חבצלות",15],["מישל קנטרוביץ","א","בינה",15],["איל אהרן הר-חן","ב","תלפיות",15],["סתיו וידס","ב","צמרת",15],["גיא דרור","ג","תלפיות",15],["דניאל זמר","ג","תלפיות",15],["אוריאל בן חיים","ד","תוכניתן בחיל האוויר",15],["דור בן מנחם","ד","חבצלות",15],["גפן גוברין","א","חבצלות",16],["שחר קיסרי","א","גבישים",16],["אליאור ששון","ב","צמרת",16],["מיכל ברכה דיקמן","ב","תלפיות",16],["אריאל אנגלמן","ג","פסגות",16],["עמרי חולתי","ג","תלפיות",16],["אורי שיינר","ה","אקדמיזציה – חיל הים",16],["יונתן משה","ה","אקדמיזציה",16],["אלון רוזנפרל","א","תלפיות",17],["גלינה סולפובר","א","בינה",17],["אילון יניב","ב","חבצלות",17],["הדר קרייזמן","ב","צמרת",17],["בצלאל יעקב חי בן ישי","ג","תלפיות",17],["רביד אופק","ג","תלפיות",17],["מאיה אפשטיין","ד","חבצלות",17],["עידו בוחניק","ד","גבישים",17],["ויאם דגש","א","צמרת",18],["רוי מלכיאלי","א","ברקים",18],["הראל עמר","ג","חיל הים",18],["רימון קורח","ג","חבצלות",18],["אמיר בסון","ד","תלפיות",18],["לינוי אדלמן","ד","גבישים",18],["מתן שפורר","ה","תלפיות",18],["ניק אוסטה","ה","",18],["נריה לפיד","א","צמרת",19],["עומר ירון","א","ברקים",19],["יהב דוד בראגין","ב","תלפיות",19],["יולי בר","ב","חבצלות",19],["איתן עמידור","ג","חבצלות",19],["עינב שזיפי","ג","תוכניתנית באופק",19],["אורי תובל","ה","תלפיות",19],["נעם עמר","ה","תלפיות",19],["יהב חיימוביץ","א","ברקים",20],["מיכל איליאיץ","א","צמרת",20],["דוד שוורץ","ב","חבצלות",20],["נעמה גלזר","ב","חבצלות",20],["אלמוג יונתן פרץ","ג","תלפיות",20],["רום נשר","ג","צמרת",20],["גיתאי קצבמן","ה","עתודה – חיל הים",20],["הדר קיסר","ה","תלפיות",20],["ליאור קורשנבאום","א","תלפיות",21],["סופיה יאסקו","א","צמרת",21],["ברק בלום","ב","חבצלות",21],["יהונתן בן יוסף","ב","צמרת",21],["גיא לוי","ג","תלפיות",21],["יעקב ידידיה בן שאול","ג","תלפיות",21],["גפן צייגר","ה","חבצלות",21],["פראס סלאמנה","ה","פסגה – חיל הרפואה",21],["דניאל יעקב רוזינס","א","חבצלות",22],["שחר נחמיה","א","צמרת",22],["איילה יצחקי","ג","תלפיות",22],["יהונתן סבן","ג","תלפיות",22],["ינון לוי","ג","חיל הים",22],["הראל שוורץ","ד","צמרת",22],["מעיין משה","ד","תלפיות",22],["ניר מימון","ד","חבצלות",22],["אחינועם בנשבת","ב","סילון",23],["תומר ברעם","ב","ברקים",23],["יואב קורש","ג","תלפיות",23],["מגד זימרן","ג","חבצלות",23],["אייקו שלו","ד","צמרת",23],["יהונתן הלוי","ד","חבצלות",23],["מאיר הרשקוביץ","ה","צמרת",23],["שגיא רג'ואן","ה","תלפיות",23],["ירדן עייש","א","ברקים",24],["עידו עטר","א","חבצלות",24],["אור צור","ב","תלפיות",24],["אסף מלכא","ב","צמרת",24],["תמר קנמח","ב","בינה",24],["סאלח גדבאן","ד","צמרת",24],["עומר חתם","ד","תלפיות",24],["אלעד משעלי","ה","תלפיות",24],["עמית אטל","ה","חבצלות",24],["אופיר דדון","ב","צמרת",25],["נעמה שבירו","ב","יועצת ארגונית",25],["דוד מסין","ג","ברקים",25],["יעקב לוין","ג","תלפיות",25],["בני קצוביץ","ד","חיל הים",25],["יערה נחום","ד","חבצלות",25],["גילעד כץ","ה","חבצלות",25],["רועי סיגמן","ה","תלפיות",25],["יהונתן סלומון","א","תלפיות",26],["יואב סצמסקי","א","בינה",26],["גלעד דותן","ב","תלפיות",26],["יובל בראון","ב","אחות",26],["אורין אהרונוביץ","ד","צמרת",26],["רועי לנגרמן","ד","חבצלות",26],["אור כליף","ה","צמרת",26],["מרגריטה בירצ'נסקי","ה","סילון",26],["אילון גולדברג","ב","חבצלות",27],["אריאל אבירם","ב","חבצלות",27],["אביחי מזין","ג","חיל הים",27],["תמר ברבש","ג","צמרת",27],["אלמוג נגר","ד","ברקים",27],["ספיר טוביאס","ד","תלפיות",27],["דניאל איגלר","ה","אקדמיזציה – חיל הים",27],["תומר נסים","ה","תלפיות",27],["אביב וואל","א","סילון",28],["נוה לוי צדוק","א","תלפיות",28],["יואב בנסל","ב","צמרת",28],["פראדי שפרונג","ב","ברקים",28],["איתמר עמנואל נירפז","ג","חבצלות",28],["אריאל שליאמסר","ג","צמרת",28],["גפן פרומקס","ד","תלפיות",28],["יהל כהן סולאל","ד","חבצלות",28],["דניאל בנדיקטוב","א","תלפיות",29],["ליאור צוקורל","א","ברקים",29],["עמית לב","ב","אחות",29],["רומי פוהורילס","ב","חבצלות",29],["דן יצחק ברס טופ","ג","בינה",29],["נטע אילני","ג","תלפיות",29],["עידן אדמסקי","ד","תלפיות",29],["עמית בן סימון","ד","צמרת",29],["עומר בק","א","ברקים",30],["רבקה אלקובי","א","תלפיות",30],["מוריה מיקרקש","ב","צמרת",30],["עומר טיסר","ב","תלפיות",30],["ניתאי לבנון","ג","אר״ם",30],["נתנאל דוד ויטמן","ג","חבצלות",30],["יאיר קצוביץ׳","ד","תלפיות",30],["נועה לוי","ד","חבצלות",30],["גלעד מימון","א","חבצלות",31],["עילאי דוד שדה","א","תלפיות",31],["איתי פוקס","ב","חבצלות",31],["תומר סוקרי","ב","תלפיות",31],["איתי גינזבורג","ד","בינה",31],["נועה קינן מלול","ד","צמרת",31],["יואב אלבלק","ה","תוכניתן",31],["רויטל קושניר","ה","",31],["דניאל אשל","א","תלפיות",32],["נעמי אלוש","א","פסגות",32],["לוטם זמיר","ב","צמרת",32],["רון שלום","ב","חבצלות",32],["עידו הון","ג","תלפיות",32],["רועי רויזין","ג","חבצלות",32],["אביב זוכמן","ה","צמרת",32],["אריאל פלוס","ה","אקדמיזציה",32],["אוהד שמעוני","ב","תלפיות",33],["יונתן ליפשיץ","ב","חבצלות",33],["איתי יוסף נעים","ג","תלפיות",33],["סיון פרינטה","ג","צמרת",33],["יובל בארי","ד","ברקים",33],["ליאם לוי","ד","81",33],["אביטל יוספין","ה","צמרת",33],["עומר גיל שור","ה","חבצלות",33]];
+// מיפוי צוות → חדר
+const ROOMS = {1:"312", 2:"312", 3:"312", 4:"315", 5:"315", 6:"315", 7:"315א", 8:"315א", 9:"315א", 10:"408", 11:"408", 12:"408", 13:"412", 14:"412", 15:"412", 16:"415", 17:"415", 18:"415", 19:"418", 20:"418", 21:"418", 22:"419", 23:"419", 24:"419", 25:"420", 26:"420", 27:"420", 28:"405", 29:"405", 30:"406", 31:"406", 32:"407", 33:"407"};
+const room = t => ROOMS[t] ?? String(t);
+
+const people = ROWS.map((r,i)=>({id:i,name:r[0],company:r[1],program:r[2],team:r[3]}));
+const byTeam = {};
+people.forEach(p=>{(byTeam[p.team] ||= []).push(p)});
+
+const fin = {'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'};
+const norm = s => (s||'').replace(/[\s'"׳״\-–]/g,'').replace(/[ךםןףץ]/g,c=>fin[c]).toLowerCase();
+const normWords = s => (s||'').split(/\s+/).map(norm).filter(Boolean);
+const q = document.getElementById('q'), out = document.getElementById('out');
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function search(text){
+  const words = normWords(text);
+  if(!words.length) return [];
+  return people.filter(p=>{const n=norm(p.name);return words.every(w=>n.includes(w));})
+  .sort((a,b)=>{
+    const aw = normWords(a.name).some(x=>x.startsWith(words[0]))?0:1;
+    const bw = normWords(b.name).some(x=>x.startsWith(words[0]))?0:1;
+    return aw-bw || a.name.localeCompare(b.name,'he');
+  });
+}
+function renderList(){
+  const text = q.value.trim();
+  if(!text){ out.innerHTML=''; return; }
+  const res = search(text);
+  if(!res.length){ out.innerHTML='<div class="list"><div class="empty">לא נמצא שם כזה. נסו רק שם משפחה, או פתחו את רשימת החדרים למטה.</div></div>'; return; }
+  if(res.length===1){ showPerson(res[0].id); return; }
+  out.innerHTML = '<div class="list">'+res.slice(0,30).map(p=>
+    `<button type="button" data-id="${p.id}"><span>${esc(p.name)}</span><span class="meta">פלוגה ${esc(p.company)} · צוות ${p.team}</span></button>`).join('')+'</div>';
+}
+const matesHTML = (mates, meId) => `<div class="mates"><h3>הצוות · ${mates.length} צוערים</h3><ul>${
+  mates.map(m=>`<li class="${m.id===meId?'me':''}"><span>${esc(m.name)}</span><span>פלוגה ${esc(m.company)}</span></li>`).join('')}</ul></div>`;
+
+function showPerson(id){
+  const p = people[id];
+  out.innerHTML = `<div class="badge">
+    <div class="top">
+      <div><p class="name">${esc(p.name)}</p><p class="who">פלוגה ${esc(p.company)}${p.program?' · '+esc(p.program):''}</p></div>
+      <div class="room"><small>חדר</small><b>${esc(room(p.team))}</b></div>
+    </div>
+    <div class="teamband"><div class="n">${p.team}</div><div class="l"><span>צוות</span><span>צוות ${p.team} · חדר ${esc(room(p.team))}</span></div></div>
+    ${matesHTML(byTeam[p.team], p.id)}
+    <div class="foot"><button type="button" class="back" id="back">← חיפוש נוסף</button><span class="share">גדוד אלון · האקתון</span></div>
+  </div>`;
+  out.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showTeam(t){
+  out.innerHTML = `<div class="badge">
+    <div class="top">
+      <div><p class="name">צוות ${t}</p><p class="who">${byTeam[t].length} צוערים</p></div>
+      <div class="room"><small>חדר</small><b>${esc(room(t))}</b></div>
+    </div>
+    ${matesHTML(byTeam[t], -1)}
+    <div class="foot"><button type="button" class="back" id="back">← חזרה לחיפוש</button><span class="share">גדוד אלון · האקתון</span></div>
+  </div>`;
+  out.scrollIntoView({behavior:'smooth',block:'start'});
+}
+q.addEventListener('input', renderList);
+out.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.id==='back'){ q.value=''; out.innerHTML=''; q.focus(); return; }
+  if(b.dataset.id!==undefined) showPerson(+b.dataset.id);
+});
+// חדרים → צוותים, לפי סדר הופעה
+const byRoom = [];
+Object.keys(byTeam).map(Number).sort((a,b)=>a-b).forEach(t=>{
+  const r = room(t); let e = byRoom.find(x=>x.room===r); if(!e){e={room:r,teams:[]};byRoom.push(e);} e.teams.push(t);
+});
+const roomsEl = document.getElementById('rooms');
+roomsEl.innerHTML = byRoom.map(e=>`<div class="roomcard"><div class="rn"><small>חדר</small><b>${esc(e.room)}</b></div><div class="ts">${
+  e.teams.map(t=>`<button type="button" data-team="${t}">צוות ${t}</button>`).join('')}</div></div>`).join('');
+roomsEl.addEventListener('click', e=>{ const b=e.target.closest('button'); if(b){ showTeam(+b.dataset.team); } });
+</script>
+
+</body>
+</html>
